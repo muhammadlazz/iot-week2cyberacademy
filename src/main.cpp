@@ -7,7 +7,7 @@ const int DHT_PIN = 15;
 DHTesp dht; 
 const char* ssid = "Wokwi-GUEST"; ///  wifi ssid 
 const char* password = "";
-const char* mqtt_server = ".....";// mosquitto server url
+const char* mqtt_server = "test.mosquitto.org";// mosquitto server url
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -22,7 +22,7 @@ void setup_wifi() {
   Serial.println(ssid);
 
   WiFi.mode(WIFI_STA); 
-  WiFi.begin(...., .....);
+  WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) { 
     delay(500);
@@ -50,8 +50,8 @@ void reconnect() {
     clientId += String(random(0xffff), HEX);
     if (client.connect(clientId.c_str())) {
       Serial.println("Connected");
-      client.publish("/cyberacademy/....", "Welcome");
-      client.subscribe("/cyberacademy/....."); 
+      client.publish("/cyberacademy/Publish", "Welcome");
+      client.subscribe("/cyberacademy/Subscribe"); 
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -63,9 +63,9 @@ void setup() {
   pinMode(2, OUTPUT);     
   Serial.begin(115200);
   setup_wifi(); 
-  client.setServer(mqtt_server, ....);
+  client.setServer(mqtt_server, 1883);
   client.setCallback(callback); 
-  dht.setup(..._PIN, DHTesp::DHT22);
+  dht.setup(DHT_PIN, DHTesp::DHT22);
 }
 void loop() {
   if (!client.connected()) {
@@ -81,11 +81,11 @@ void loop() {
     String temp = String(data.temperature, 2);
     client.publish("/cyberacademy/temp", temp.c_str()); // publish temp topic
     String hum = String(data.humidity, 1); 
-    client.publish("/...../....", hum.c_str());   // publish hum topic
+    client.publish("/cyberacademy/hum", hum.c_str());   // publish hum topic
 
     Serial.print("Temperature: ");
     Serial.println(temp);
-    Serial.....("Humidity: ");
-    Serial......(hum);
+    Serial.print("Humidity: ");
+    Serial.println(hum);
   }
 }
